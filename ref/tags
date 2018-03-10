@@ -1,0 +1,94 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BasicClassifier	model.py	/^class BasicClassifier(object):$/;"	c
+DATA_DIR	data_utils.py	/^DATA_DIR = os.path.join(REPO_DIR, 'python')$/;"	v
+DATA_FILE_FORMAT	data_utils.py	/^DATA_FILE_FORMAT = os.path.join(MAIN_DIR, '%s_omni.pkl')$/;"	v
+FLAGS	model.py	/^FLAGS = tf.flags.FLAGS$/;"	v
+FLAGS	train.py	/^FLAGS = tf.flags.FLAGS$/;"	v
+IMAGE_NEW_SIZE	data_utils.py	/^IMAGE_NEW_SIZE = 28$/;"	v
+IMAGE_ORIGINAL_SIZE	data_utils.py	/^IMAGE_ORIGINAL_SIZE = 105$/;"	v
+LSHMemory	memory.py	/^class LSHMemory(Memory):$/;"	c
+LeNet	model.py	/^class LeNet(object):$/;"	c
+MAIN_DIR	data_utils.py	/^MAIN_DIR = ''$/;"	v
+Memory	memory.py	/^class Memory(object):$/;"	c
+Model	model.py	/^class Model(object):$/;"	c
+REPO_DIR	data_utils.py	/^REPO_DIR = os.path.join(MAIN_DIR, 'omniglot')$/;"	v
+REPO_LOCATION	data_utils.py	/^REPO_LOCATION = 'https:\/\/github.com\/brendenlake\/omniglot.git'$/;"	v
+TEST_DIR	data_utils.py	/^TEST_DIR = os.path.join(DATA_DIR, 'images_evaluation')$/;"	v
+TEST_ROTATIONS	data_utils.py	/^TEST_ROTATIONS = False  # augment testing data with rotations$/;"	v
+TRAIN_DIR	data_utils.py	/^TRAIN_DIR = os.path.join(DATA_DIR, 'images_background')$/;"	v
+TRAIN_ROTATIONS	data_utils.py	/^TRAIN_ROTATIONS = True  # augment training data with rotations$/;"	v
+Trainer	train.py	/^class Trainer(object):$/;"	c
+__init__	memory.py	/^  def __init__(self, key_dim, memory_size, vocab_size,$/;"	m	class:LSHMemory
+__init__	memory.py	/^  def __init__(self, key_dim, memory_size, vocab_size,$/;"	m	class:Memory
+__init__	model.py	/^  def __init__(self, image_size, num_channels, hidden_dim):$/;"	m	class:LeNet
+__init__	model.py	/^  def __init__(self, input_dim, output_dim, rep_dim, memory_size, vocab_size,$/;"	m	class:Model
+__init__	model.py	/^  def __init__(self, output_dim):$/;"	m	class:BasicClassifier
+__init__	train.py	/^  def __init__(self, train_data, valid_data, input_dim, output_dim=None):$/;"	m	class:Trainer
+clear	memory.py	/^  def clear(self):$/;"	m	class:LSHMemory
+clear	memory.py	/^  def clear(self):$/;"	m	class:Memory
+clear_memory	model.py	/^  def clear_memory(self, sess):$/;"	m	class:Model
+compute_correct	train.py	/^  def compute_correct(self, ys, y_preds):$/;"	m	class:Trainer
+core_builder	model.py	/^  def core_builder(self, memory_val, x, y):$/;"	m	class:BasicClassifier
+core_builder	model.py	/^  def core_builder(self, x):$/;"	m	class:LeNet
+core_builder	model.py	/^  def core_builder(self, x, y, keep_prob, use_recent_idx=True):$/;"	m	class:Model
+crawl_directory	data_utils.py	/^def crawl_directory(directory, augment_with_rotations=False,$/;"	f
+data_utils	train.py	/^import data_utils$/;"	i
+episode_predict	model.py	/^  def episode_predict(self, sess, x, y, clear_memory=False):$/;"	m	class:Model
+episode_step	model.py	/^  def episode_step(self, sess, x, y, clear_memory=False):$/;"	m	class:Model
+eval	model.py	/^  def eval(self, x, y):$/;"	m	class:Model
+get	memory.py	/^  def get(self):  # not implemented$/;"	m	class:LSHMemory
+get	memory.py	/^  def get(self):$/;"	m	class:Memory
+get_classifier	model.py	/^  def get_classifier(self):$/;"	m	class:Model
+get_data	data_utils.py	/^def get_data():$/;"	f
+get_embedder	model.py	/^  def get_embedder(self):$/;"	m	class:Model
+get_hash_slots	memory.py	/^  def get_hash_slots(self, query):$/;"	m	class:LSHMemory
+get_hint_pool_idxs	memory.py	/^  def get_hint_pool_idxs(self, normalized_query):$/;"	m	class:LSHMemory
+get_hint_pool_idxs	memory.py	/^  def get_hint_pool_idxs(self, normalized_query):$/;"	m	class:Memory
+get_memory	model.py	/^  def get_memory(self):$/;"	m	class:Model
+get_model	train.py	/^  def get_model(self):$/;"	m	class:Trainer
+get_optimizer	model.py	/^  def get_optimizer(self):$/;"	m	class:Model
+get_xy_placeholders	model.py	/^  def get_xy_placeholders(self):$/;"	m	class:Model
+imread	data_utils.py	/^from scipy.ndimage import imread$/;"	i
+imresize	data_utils.py	/^from scipy.misc import imresize$/;"	i
+imrotate	data_utils.py	/^from scipy.misc import imrotate$/;"	i
+individual_compute_correct	train.py	/^  def individual_compute_correct(self, y, y_pred):$/;"	m	class:Trainer
+logging	data_utils.py	/^import logging$/;"	i
+logging	train.py	/^import logging$/;"	i
+main	data_utils.py	/^def main(unused_argv):$/;"	f
+main	train.py	/^def main(unused_argv):$/;"	f
+make_update_op	memory.py	/^    def make_update_op():$/;"	f	function:Memory.query
+make_update_op	memory.py	/^  def make_update_op(self, upd_idxs, upd_keys, upd_vals,$/;"	m	class:LSHMemory
+make_update_op	memory.py	/^  def make_update_op(self, upd_idxs, upd_keys, upd_vals,$/;"	m	class:Memory
+maybe_download_data	data_utils.py	/^def maybe_download_data():$/;"	f
+memory	model.py	/^import memory$/;"	i
+model	train.py	/^import model$/;"	i
+np	data_utils.py	/^import numpy as np$/;"	i
+np	memory.py	/^import numpy as np$/;"	i
+np	train.py	/^import numpy as np$/;"	i
+one_step	model.py	/^  def one_step(self, sess, x, y):$/;"	m	class:Model
+os	data_utils.py	/^import os$/;"	i
+os	train.py	/^import os$/;"	i
+pickle	data_utils.py	/^import cPickle as pickle$/;"	i
+predict	model.py	/^  def predict(self, sess, x, y=None):$/;"	m	class:Model
+preprocess_omniglot	data_utils.py	/^def preprocess_omniglot():$/;"	f
+query	memory.py	/^  def query(self, query_vec, intended_output, use_recent_idx=True):$/;"	m	class:Memory
+random	train.py	/^import random$/;"	i
+resize_images	data_utils.py	/^def resize_images(images, new_width, new_height):$/;"	f
+run	train.py	/^  def run(self):$/;"	m	class:Trainer
+sample_episode_batch	train.py	/^  def sample_episode_batch(self, data,$/;"	m	class:Trainer
+set	memory.py	/^  def set(self, k, v, a, r=None):  # not implemented$/;"	m	class:LSHMemory
+set	memory.py	/^  def set(self, k, v, a, r=None):$/;"	m	class:Memory
+setup	model.py	/^  def setup(self):$/;"	m	class:Model
+subprocess	data_utils.py	/^import subprocess$/;"	i
+tf	data_utils.py	/^import tensorflow as tf$/;"	i
+tf	memory.py	/^import tensorflow as tf$/;"	i
+tf	model.py	/^import tensorflow as tf$/;"	i
+tf	train.py	/^import tensorflow as tf$/;"	i
+train	model.py	/^  def train(self, x, y):$/;"	m	class:Model
+training_ops	model.py	/^  def training_ops(self, loss):$/;"	m	class:Model
+write_datafiles	data_utils.py	/^def write_datafiles(directory, write_file,$/;"	f
