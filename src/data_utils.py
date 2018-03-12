@@ -8,12 +8,12 @@ Simply call
 
 import logging
 import os
-import urllib.request
-import tarfile
+#import urllib.request
+#import tarfile
 import subprocess
 import pickle
 import numpy as np
-from skimage.io import imread
+#from skimage.io import imread
 from skimage.transform import resize
 from skimage.transform import rotate
 
@@ -87,11 +87,14 @@ def convert_image_array_to_RGBs(array):
     return img_arr
 
 def convert_RGBs_to_Grey(img, width, height):
-    arr = np.zeros([width, height], dtype=np.float32)
+    arr = np.zeros([width, height], dtype=np.uint32)
     for i in range(width):
         for j in range(height):
-            arr[i][j] = 0.299 * img[i][j][0] + 0.587 * img[i][j][1] + 0.114 * img[i][j][2]
-
+            arr[i][j] = int(0.299 * img[i][j][0] + 0.587 * img[i][j][1] + 0.114 * img[i][j][2])
+            if arr[i][j] > 255:
+                arr[i][j] = 255
+            elif arr[i][j] < 0:
+                arr[i][j] = 0
     return arr
 
 
@@ -128,8 +131,9 @@ def crawl_directory(directory, augment_with_rotations=False,
                 if not augment_with_rotations  and i > 0:
                     break
 
+                rotate(img, angle)
                 images.append(rotate(img, angle))
-                lables.append(label + i)
+                labels.append(label + i)
                 info.append(filename)
 
     return images, labels, info
@@ -175,7 +179,7 @@ def write_datafiles(directory, write_file,
     images_np = np.zeros([len(images), imgwidth, imgheight], dtype=np.bool)
     labels_np = np.zeros([len(labels)], dtype=np.uint32)
 
-    for i in xrange(len(images)):
+    for i in range(len(images)):
         images_np[i, : , : ] = images[i]
         labels_np[i] = labels[i]
 

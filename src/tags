@@ -3,37 +3,26 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
-DATASET_NAME	data_utils.py	/^DATASET_NAME = REPO_LOCATION.split('\/')[-1]$/;"	v
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DATASET_NAME	data_utils.py	/^DATASET_NAME = DATA_URL.split('\/')[-1]$/;"	v
+DATA_ARCHIVE	data_utils.py	/^DATA_ARCHIVE = os.path.join(DATA_DIR, DATASET_NAME)$/;"	v
 DATA_DIR	data_utils.py	/^DATA_DIR = '..\/data'$/;"	v
-DATA_DIR	data_utils.py	/^DATA_DIR = os.path.join(DATA_DIR, DATASET_NAME.split('.')[0])$/;"	v
-DATA_FILE_FORMAT	data_utils.py	/^DATA_FILE_FORMAT = os.path.join(DATA_DIR, '%s_dataset.pkl')$/;"	v
+DATA_FILE_FORMAT	data_utils.py	/^DATA_FILE_FORMAT = os.path.join(DATA_UNARCHIVE_DIR, '%s_dataset.pkl')$/;"	v
+DATA_UNARCHIVE_DIR	data_utils.py	/^DATA_UNARCHIVE_DIR = os.path.join(DATA_DIR, DATASET_NAME.split('.')[0])$/;"	v
+DATA_URL	data_utils.py	/^DATA_URL = 'https:\/\/www.cs.toronto.edu\/~kriz\/cifar-10-python.tar.gz'$/;"	v
 IMAGE_NEW_SIZE	data_utils.py	/^IMAGE_NEW_SIZE = 28$/;"	v
 IMAGE_ORIGINAL_SIZE	data_utils.py	/^IMAGE_ORIGINAL_SIZE = 32$/;"	v
 MAIN_DIR	data_utils.py	/^MAIN_DIR = ''$/;"	v
-REPO_FILE	data_utils.py	/^REPO_FILE = os.path.join(DATA_DIR, DATASET_NAME)$/;"	v
-REPO_LOCATION	data_utils.py	/^REPO_LOCATION = 'https:\/\/www.cs.toronto.edu\/~kriz\/cifar-10-python.tar.gz'$/;"	v
-TEST_DIR	data_utils.py	/^TEST_DIR = os.path.join(DATA_DIR, 'images_evaluation')$/;"	v
+TEST_DIR	data_utils.py	/^TEST_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_evaluation')$/;"	v
 TEST_ROTATIONS	data_utils.py	/^TEST_ROTATIONS = False$/;"	v
-TRAIN_DIR	data_utils.py	/^TRAIN_DIR = os.path.join(DATA_DIR, 'images_background')$/;"	v
+TRAIN_DIR	data_utils.py	/^TRAIN_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_background')$/;"	v
 TRAIN_ROTATIONS	data_utils.py	/^TRAIN_ROTATIONS = True # augment training data with rotations$/;"	v
+convert_RGBs_to_Grey	data_utils.py	/^def convert_RGBs_to_Grey(img, width, height):$/;"	f
 convert_image_array_to_RGBs	data_utils.py	/^def convert_image_array_to_RGBs(array):$/;"	f
 crawl_directory	data_utils.py	/^def crawl_directory(directory, augment_with_rotations=False,$/;"	f
 get_data	data_utils.py	/^def get_data():$/;"	f
-imread	data_utils.py	/^from skimage.io import imread$/;"	i
-logging	data_utils.py	/^import logging$/;"	i
 maybe_download_and_extract	data_utils.py	/^def maybe_download_and_extract():$/;"	f
-np	data_utils.py	/^import numpy as np$/;"	i
-os	data_utils.py	/^import os$/;"	i
-pickle	data_utils.py	/^import pickle$/;"	i
 preprocess_dataset	data_utils.py	/^def preprocess_dataset():$/;"	f
-request	data_utils.py	/^import urllib.request$/;"	i
-resize	data_utils.py	/^from skimage.transform import resize$/;"	i
 resize_images	data_utils.py	/^def resize_images(images, new_width, new_height):$/;"	f
-rotate	data_utils.py	/^from skimage.transform import rotate$/;"	i
-subprocess	data_utils.py	/^import subprocess$/;"	i
-tarfile	data_utils.py	/^import tarfile$/;"	i
-tf	data_utils.py	/^import tensorflow as tf$/;"	i
 unpickle	data_utils.py	/^def unpickle(filename):$/;"	f
-urllib	data_utils.py	/^import urllib.request$/;"	i
 write_datafiles	data_utils.py	/^def write_datafiles(directory, write_file,$/;"	f
