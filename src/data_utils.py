@@ -28,7 +28,7 @@ DATA_ARCHIVE = os.path.join(DATA_DIR, DATASET_NAME)
 DATA_UNARCHIVE_DIR = os.path.join(DATA_DIR, DATASET_NAME.split('.')[0])
 TRAIN_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_background')
 TEST_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_evaluation')
-DATA_FILE_FORMAT = os.path.join(DATA_UNARCHIVE_DIR, '%s_dataset.pkl')
+DATA_FILE_FORMAT = '%s_dataset.pkl'
 
 TRAIN_ROTATIONS = True # augment training data with rotations
 TEST_ROTATIONS = False
@@ -73,6 +73,30 @@ def get_data():
         Train and test data as disctionaries mapping
         label to list examples.
     """
+    train_dataset_path = os.path.join(TRAIN_DIR, DATA_FILE_FORMAT % 'train')
+    with open(train_dataset_path, 'rb') as f:
+        processed_train_data = pickle.load(f, encoding='bytes')
+
+    test_dataset_path = os.path.join(TEST_DIR, DATA_FILE_FORMAT % 'test')
+    with open(test_dataset_path, 'rb') as f:
+        processed_test_data = pickle.load(f, encoding='bytes')
+
+    train_data = {}
+    test_data = {}
+
+    for data, processed_data in zip([train_data, test_data],
+                                    [processed_train_data, processed_test_data]):
+        for imgae, label in zip(processed_data['images'],
+                                processed_data['labels']):
+            if label not in data:
+                data[label] = []
+            data[label].append(image.reshape([-1]).astype('float32'))
+
+    logging.info('Number of labels in train data: %d.', len(train_data))
+    logging.info('Number of labels in test data: %d.', len(test_data))
+
+    return train_data, test_data
+
 
 def convert_image_array_to_RGBs(array):
     length_of_a_channel = IMAGE_ORIGINAL_SIZE ** 2
@@ -98,7 +122,7 @@ def convert_RGBs_to_Grey(img, width, height):
     return arr
 
 
-def crawl_directory(directory, augment_with_rotations=False,
+def crawl_directory(augment_with_rotations=False,
                     train_or_not=True):
     """Crawls data directory and returns stuff."""
     images = []
@@ -172,8 +196,7 @@ def write_datafiles(directory, write_file,
     imgheight = IMAGE_ORIGINAL_SIZE
 
     logging.info('Reading the data.')
-    images, labels, info = crawl_directory(directory=directory,
-                                           augment_with_rotations=rotate,
+    images, labels, info = crawl_directory(augment_with_rotations=rotate,
                                            train_or_not=train_or_not)
 
     images_np = np.zeros([len(images), imgwidth, imgheight], dtype=np.bool)
@@ -191,14 +214,16 @@ def write_datafiles(directory, write_file,
         data = {'images': resized_images,
                 'labels': labels_np,
                 'info': info}
-        with tf.gfile.GFile(write_file, 'w') as f:
+        write_file = os.path.join(directory ,write_file)
+        with open(write_file, 'wb') as f:
             pickle.dump(data, f);
     else:
         logging.info('Writing original sized data in boolean format')
         data = {'images': resized_images,
                 'labels': labels_np,
                 'info': info}
-        with tf.gfile.GFile(write_file, 'w') as f:
+        write_file = os.path.join(directory ,write_file)
+        with open(write_file, 'wb') as f:
             pickle.dump(data, f);
 
     #return len(np.unique(labels_np))
@@ -213,11 +238,18 @@ def preprocess_dataset():
 
     maybe_download_and_extract()
 
+    if not os.path.exists(TRAIN_DIR):
+        os.mkdir(TRAIN_DIR)
+
     directory = TRAIN_DIR
     write_file = DATA_FILE_FORMAT % 'train'
     write_datafiles(
         directory, write_file, resize=True, rotate=TRAIN_ROTATIONS,
         new_width=IMAGE_NEW_SIZE, new_height=IMAGE_NEW_SIZE, train_or_not=True)
+
+
+    if not os.path.exists(TEST_DIR):
+        os.mkdir(TEST_DIR)
 
     directory = TEST_DIR
     write_file = DATA_FILE_FORMAT % 'test'
