@@ -13,6 +13,8 @@ import numpy as np
 import tensorflow as tf
 
 import data_utils
+import model
+
 
 FLAGS = tf.flags.FLAGS
 
@@ -57,6 +59,54 @@ class Trainer():
         self.output_dim = (output_dim if output_dim is not None
                             else self.episode_width)
 
+    def sample_episode_batch(self, data,
+                             episode_length, episode_width, batch_size):
+        """Geerate a random batch for traning or validation.
+
+        Structure each element of the batch as an 'episode'.
+        Each episode contaions episode_length examples and
+        episode_width distinct labels.
+
+        Args:
+            data: A dictionary mapping label to list of examples.
+            episode_length: Number of examples in each episode.
+            episode_width: Distinct number of labels in each episode.
+            batch_size: Batch size (number of episodes).
+
+        Returns:
+            A tuple (x, y) where x is a list of batches of examples
+            with size episode_length and y is a list of batches of labels.
+        """
+        episodes_x = [[] for _ in range(episode_length)]
+        episodes_y = [[] for _ in range(episode_length)]
+        # labels >= episode_width
+        assert len(data) >= episode_width
+        keys = data.keys()
+        for b in range(batch_size):
+            episode_labels = random.sample(keys, episode_width)
+            remainder = episode_length % episode_width
+            remainders = [0] * (episode_width - remainder) + [1] * remainder
+            episode_x = [
+                    random.sample(data[lab],
+                                  r + (episode_length - remainder)
+                                  / episode_width)
+                    for lab, r in zip(episode_labels, remainders)]
+
+            episode = sum([[(x, i, ii) for ii, x in enumerate(xx)]
+                           for i, xx in enumerate(episode_x)], [])
+            random.shuffle(episode)
+            # Arrange episode so that each distinct label is seen before moving to 2nd showing, that is picture index
+            episode.sort(key=lambda elem: elem[2])
+            assert len(episode) == episode_length
+            for i in range(episode_length):
+                episodes_x[i].append(episode[i][0])
+                #episodes_y[i].append(episode[i][1] + b * episode_width)
+                episodes_y[i].append(episode[i][1])
+
+        return ([np.array(xx).astype('float32') for xx in episodes_x],
+                [np.array(yy).astype('int32') for yy in episodes_y])
+
+
     def run(self):
         """Performs training.
 
@@ -99,10 +149,10 @@ class Trainer():
         if FLAGS.save_dir:
             ckpt = tf.train.get_checkpoint_state(FLAGS.save_dir)
         if ckpt and ckpt.model_checkpoint_path:
-            loggin.info('restoring from %s' % ckpt.model_checkpoint_path)
+            logging.info('restoring from %s' % ckpt.model_checkpoint_path)
             saver.restore(sess, ckpt.model_checkpoint_path)
 
-        loggin.info('starting now')
+        logging.info('starting now')
         losses = []
         random.seed(FLAGS.seed)
         np.random.seed(FLAGS.seed)
@@ -118,40 +168,40 @@ class Trainer():
                         i, np.mean(losses))
                 losses = []
 
-            # validation
-            correct = []
-            correct_by_shot = dict((k, []) for k in range(self.episode_width + 1))
-            for _ in range(FLAGS.validation_length):
-                x, y = self.sample_episode_batch(
-                        valid_data, episode_length, episode_width, 1)
-                outputs = self.model.episode_predict(
-                        sess, x, y, clear_memory=True)
-                y_preds = outputs
-                correct.append(self.compute_correct(np.array(y), y_preds))
+                # validation
+                correct = []
+                correct_by_shot = dict((k, []) for k in range(self.episode_width + 1))
+                for _ in range(FLAGS.validation_length):
+                    x, y = self.sample_episode_batch(
+                            valid_data, episode_length, episode_width, 1)
+                    outputs = self.model.episode_predict(
+                            sess, x, y, clear_memory=True)
+                    y_preds = outputs
+                    correct.append(self.compute_correct(np.array(y), y_preds))
 
-                # compute pre-shot accuracies
-                seen_counts = [[0] * episode_width for _ in range(batch_size)]
-                # loop over episode steps
-                for yy, yy_preds in zip(y, y_preds):
-                    # loop over batch examples
-                    for k, (yyy, yyy_preds) in enumerate(zip(yy, yy_preds)):
-                        yyy, yyy_preds = int(yyy), int(yyy_preds)
-                        count = seen_counts[k][yyy % self.episode_width]
-                        if count in correct_by_shot:
-                            correct_by_shot[count].append(
-                                    self.individual_compute_correct(yyy, yyy_preds))
-                        seen_counts[k][yyy % self.episode_width] = count + 1
+                    # compute pre-shot accuracies
+                    seen_counts = [[0] * episode_width for _ in range(batch_size)]
+                    # loop over episode steps
+                    for yy, yy_preds in zip(y, y_preds):
+                        # loop over batch examples
+                        for k, (yyy, yyy_preds) in enumerate(zip(yy, yy_preds)):
+                            yyy, yyy_preds = int(yyy), int(yyy_preds)
+                            count = seen_counts[k][yyy % self.episode_width]
+                            if count in correct_by_shot:
+                                correct_by_shot[count].append(
+                                        self.individual_compute_correct(yyy, yyy_preds))
+                            seen_counts[k][yyy % self.episode_width] = count + 1
 
-            logging.info('validation overall accuracy %f', np.mean(correct))
-            logging.info('%d-shot: %.3f, ' % ( self.episode_width + 1,
-                        sum([[k, np.mean(correct_by_shot[k])]
-                            for k in range(self.episode_width + 1)], []))
+                logging.info('validation overall accuracy %f', np.mean(correct))
+                logging.info('%d-shot: %.3f, ' % ( self.episode_width + 1,
+                            sum([[k, np.mean(correct_by_shot[k])]
+                                for k in range(self.episode_width + 1)], [])))
 
-            if saver and FLAGS.save_dir:
-                saved_file = saver.save(sess,
-                                        os.path.join(FLAGS.save_dir, 'model.ckpt'),
-                                        global_step=self.model.global_step)
-                logging.info('saved model to %s' % saved_file)
+                if saver and FLAGS.save_dir:
+                    saved_file = saver.save(sess,
+                                            os.path.join(FLAGS.save_dir, 'model.ckpt'),
+                                            global_step=self.model.global_step)
+                    logging.info('saved model to %s' % saved_file)
 
 
 def main(unused_argv):
