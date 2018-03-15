@@ -8,15 +8,12 @@ Simply call
 
 import logging
 import os
-#import urllib.request
-#import tarfile
-import subprocess
+import tarfile
 import pickle
 import numpy as np
-#from skimage.io import imread
+import wget
 from skimage.transform import resize
 from skimage.transform import rotate
-
 
 import tensorflow as tf
 
@@ -51,7 +48,8 @@ def maybe_download_and_extract():
     else:
         logging.info('download file %s with urllib.request' % (DATASET_NAME))
 
-        subprocess.check_output('wget %s -O %s' % (DATA_URL, DATA_ARCHIVE), shell=True)
+        wget.download(DATA_URL, DATA_ARCHIVE)
+        #subprocess.check_output('wget %s -O %s' % (DATA_URL, DATA_ARCHIVE), shell=True)
 
 
     if os.path.exists(DATA_UNARCHIVE_DIR):
@@ -63,7 +61,9 @@ def maybe_download_and_extract():
 
         logging.info('tar now')
 
-        subprocess.check_output('tar -zxvf %s -C %s --strip-components 1' % (DATA_ARCHIVE, DATA_UNARCHIVE_DIR), shell=True)
+        #subprocess.check_output('tar -zxvf %s -C %s --strip-components 1' % (DATA_ARCHIVE, DATA_UNARCHIVE_DIR), shell=True)
+        tarfile.open(DATA_ARCHIVE).extractall(DATA_DIR)
+        os.rename(os.path.join(DATA_ARCHIVE, 'cifar-10-batches-py'), DATA_UNARCHIVE_DIR)
 
 
 def get_data():
@@ -83,17 +83,19 @@ def get_data():
 
     train_data = {}
     test_data = {}
+    #train_data = processed_train_data
+    #test_data = processed_test_data
 
     for data, processed_data in zip([train_data, test_data],
                                     [processed_train_data, processed_test_data]):
-        for imgae, label in zip(processed_data['images'],
+        for image, label in zip(processed_data['images'],
                                 processed_data['labels']):
             if label not in data:
                 data[label] = []
             data[label].append(image.reshape([-1]).astype('float32'))
 
-    logging.info('Number of labels in train data: %d.', len(train_data))
-    logging.info('Number of labels in test data: %d.', len(test_data))
+    #logging.info('Number of keys() in train data: %d.', len(train_data))
+    #logging.info('Number of keys() in test data: %d.', len(test_data))
 
     return train_data, test_data
 
@@ -157,7 +159,7 @@ def crawl_directory(augment_with_rotations=False,
 
                 rotate(img, angle)
                 images.append(rotate(img, angle))
-                labels.append(label + i)
+                labels.append(label)
                 info.append(filename)
 
     return images, labels, info
@@ -171,7 +173,7 @@ def resize_images(images, new_width, new_height):
         resized_images[i, :, :] = resize(images[i,:,:],
                                         (new_width, new_height))
 
-    return resize_images
+    return resized_images
 
 def write_datafiles(directory, write_file,
                     resize=True, rotate=False,

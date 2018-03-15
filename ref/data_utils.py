@@ -20,7 +20,7 @@ Simply call
   python data_utils.py
 """
 
-import cPickle as pickle
+import pickle
 import logging
 import os
 import subprocess
@@ -53,10 +53,10 @@ def get_data():
     Train and test data as dictionaries mapping
     label to list of examples.
   """
-  with tf.gfile.GFile(DATA_FILE_FORMAT % 'train') as f:
-    processed_train_data = pickle.load(f)
-  with tf.gfile.GFile(DATA_FILE_FORMAT % 'test') as f:
-    processed_test_data = pickle.load(f)
+  with open(DATA_FILE_FORMAT % 'train', 'rb') as f:
+    processed_train_data = pickle.load(f, encoding='bytes')
+  with open(DATA_FILE_FORMAT % 'test', 'rb') as f:
+    processed_test_data = pickle.load(f, encoding='bytes')
 
   train_data = {}
   test_data = {}
@@ -69,16 +69,17 @@ def get_data():
         data[label] = []
       data[label].append(image.reshape([-1]).astype('float32'))
 
-  intersection = set(train_data.keys()) & set(test_data.keys())
-  assert not intersection, 'Train and test data intersect.'
-  ok_num_examples = [len(ll) == 20 for _, ll in train_data.iteritems()]
-  assert all(ok_num_examples), 'Bad number of examples in train data.'
-  ok_num_examples = [len(ll) == 20 for _, ll in test_data.iteritems()]
-  assert all(ok_num_examples), 'Bad number of examples in test data.'
-
-  logging.info('Number of labels in train data: %d.', len(train_data))
-  logging.info('Number of labels in test data: %d.', len(test_data))
-
+#  intersection = set(train_data.keys()) & set(test_data.keys())
+#  assert not intersection, 'Train and test data intersect.'
+#  ok_num_examples = [len(ll) == 20 for _, ll in train_data.iteritems()]
+#  assert all(ok_num_examples), 'Bad number of examples in train data.'
+#  ok_num_examples = [len(ll) == 20 for _, ll in test_data.iteritems()]
+#  assert all(ok_num_examples), 'Bad number of examples in test data.'
+#
+#  logging.info('Number of labels in train data: %d.', len(train_data))
+#  logging.info('Number of labels in test data: %d.', len(test_data))
+  print(train_data.keys())
+  print(test_data.keys())
   return train_data, test_data
 
 
@@ -156,13 +157,14 @@ def write_datafiles(directory, write_file,
 
   images_np = np.zeros([len(images), imgwidth, imgheight], dtype=np.bool)
   labels_np = np.zeros([len(labels)], dtype=np.uint32)
-  for i in xrange(len(images)):
+  for i in range(len(images)):
     images_np[i, :, :] = images[i]
     labels_np[i] = labels[i]
 
   if resize:
     logging.info('Resizing images.')
-    resized_images = resize_images(images_np, new_width, new_height)
+    #resized_images = resize_images(images_np, new_width, new_height)
+    resized_images = images_np
 
     logging.info('Writing resized data in float32 format.')
     data = {'images': resized_images,
