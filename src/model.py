@@ -69,5 +69,153 @@ class LeNet():
 
         # fully conncted
         fc1_weights = tf.get_variable(
-                'fc1_w', [
+                'fc1_w', [self.image_size // 4 * self.image_size // 4 * ch2,
+                          self.hidden_dim], initializer=self.matrix_init)
+        fc1_biases = tf.get_variable('fc1_b', [self.hidden_dim],
+                                     initializer=self.vector_init)
+
+        # define model
+        x = tf.reshape(x,
+                       [-1, self.image_size, self.image_size, self.num_channels])
+
+        conv1a = tf.nn.conv2d(x, conv1a_weights,
+                             strides=[1, 1, 1, 1], padding='SAME')
+        relu1a = tf.nn.relu(tf.nn.bias_add(conv1a, conv1a_biases))
+        conv1b = tf.nn.conv2d(relu1a, conv1b_weights,
+                              strides=[1, 1, 1, 1], padding='SAME')
+        relu1b = tf.nn.relu(tf.nn.bias_add(conv1b, conv1b_biases))
+
+        pool1 = tf.nn.max_pool(relu1b, ksize=[1, 2, 2, 1],
+                               strides=[1, 2, 2, 1], padding='SAME')
+
+        conv2a = tf.nn.conv2d(pool1, conv2a_weights,
+                              strides=[1, 1, 1, 1], padding='SAME')
+        relu2a = tf.nn.relu(tf.nn.bias_add(conv2a, conv2a_biases))
+        conv2b = tf.nn.conv2d(relu2a, conv2b_weights,
+                            strides=[1, 1, 1, 1], padding='SAME')
+        relu2b = tf.relu(tf.nn.bias_add(conv2b, conv2b_weights))
+
+        pool2 = tf.nn.max_pool(relu2b, ksize=[1, 2, 2, 1], padding='SAME',
+                               strides=[1, 2, 2, 1], padding='SAME')
+
+        reshape = tf.reshape(pool2, [batch_size, -1])
+        hidden_dim = tf.matmul(reshape, fc1_weights) + fc1_biases
+
+        return hidden
+
+
+class Model():
+    """MOdel for coordinating bwtween CNN embedder and Memory module."""
+
+    def __init__(self, input_dim, output_dim, rep_dim, memory_size, vocab_size,
+                 learning_rate=0.0001, use_lsh=False):
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.rep_dim = rep_dim
+        self.memory_size = memory_size
+        self.vocab_size = vocab_size
+        self.learning_rate = learning_rate
+        self.use_lsh = use_lsh
+
+        self.embedder = self.get_embedder()
+        self.memory = self.get_memory()
+        self.classifier = self.get_classifier()
+
+        self.global_step = tf.train.get_or_create_global_step()
+
+    def train(self, x, y):
+        loss, _ = self.core_builder(x, y, keep_prob=0.3)
+
+    def eval(self, x, y):
+        _, y_preds = self.core_builder(x, y, keep_prob=1.0,
+                                       use_recent_idx=False)
+    def get_xy_placeholders(self):
+        return (tf.placeholder(tf.float32, [None, self.input_dim]),
+                tf.placeholder(tf.int32, [None]))
+
+    def setup(self):
+        """Sets up all components of the computation graph."""
+
+        self.x, self.y = self.get_xy_placeholders()
+
+        with tf.variable_scope('core', reuse=None):
+            self.loss, self.gradient_ops = self.train(self.x, self.y)
+        with tf.variable_scope('core', reuse=True):
+            self.y_preds = self.eval(self.x, self.y) # why self.y
+
+        # setup memory "reset" ops
+        (self.mem_keys, self.mem_vals,
+         self.mem_age, self.recent_idx) = self.memory.get()
+        self.mem_keys_reset = tf.placeholder(self.mem_keys.dtype,
+                                             tf.identity(self.mem_keys).shape)
+        self.mem_vals_reset = tf.placeholder(self.mem_vals.dtype,
+                                             tf.identity(self.mem_vals).shape)
+        self.mem_age_reset = tf.placeholder(self.mem_age.dtype,
+                                            tf.identity(self.mem_age).shape)
+        self.recent_idx_reset = tf.placeholder(self.recent_idx.dtype,
+                                               tf.identity(self.recent_idx).shape)
+        self.mem_reset_op = self.memory.set(self.mem_keys_reset,
+                                            self.mem_vals_reset,
+                                            self.mem_age_reset,
+                                            None)
+
+    def training_ops(self, loss):
+        opt = self.get_optimizer()
+        params = tf.trainable_variables()
+        gradients = tf.gradients(loss, params)
+        clipped_gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+        return opt.apply_gradients(zip(clipped_gradients, params),
+                                   global_step=self.global_step)
+
+    def get_optimizer(self):
+        return tf.train.AdamOptimizer(learning_rate=self.learning_rate,
+                                      epsilon=1e-4)
+
+    def get_embedder(self):
+        return LeNet(int(self.input_dim ** 0,5), 1, self.rep_dim)
+
+    def get_memory(self):
+        cls = memory.LSHMemory if self.use_lsh else memory.Memory
+        return cls(self.rep_dim, self.memory_size, self.vocab_size)
+
+    def get_classifier(self):
+        return BasicClassfier(self.output_dim)
+
+    def core_builder(self, x, y, kepp_prob, use_recent_idx=True):
+        embeddings = self.embedder.core_builder(x)
+        if keep_prob < 1.0:
+            embeddings = tf.nn.dropout(embeddings, keep_prob)
+        memory_val, _, teacher_loss = self.memory.query(
+                embeddings, y, use_recent_idx=use_recent_idx)
+        loss, y_preds = self.classifier.core_builder(memory_val, x, y)
+
+        return loss + teacher_loss, y_pred
+
+    def episode_step(self, sess, x, y, clear_memory=False):
+        """Performs training steps on episodic input.
+
+        Args:
+            sess: A Tensorflow Session.
+            x: A list of batches of images defining the episode.
+            y: A list of batches of labels corresponding to x.
+            clear_memory: Whether to clear the memory before episode.
+
+        Returns:
+            List of losses the same length as the episode.
+        """
+
+        outputs = [self.loss, self.gradient_ops]
+
+        if clear_memory:
+            self.clear_memory(sess)
+
+        losses = []
+        for xx, yy in zip(x, y):
+            out = sess.run(outputs, feed_dict={self.x: xx, self.y:yy})
+            loss = out[0]
+            losses.append(loss)
+
+        return losses
+
+
 
