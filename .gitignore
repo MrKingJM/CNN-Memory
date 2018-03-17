@@ -4,3 +4,4 @@ src/__pycache__/*
 ref/__pycache__/*
 ref/*.pkl
 .DS_Store
+tmp.cc
