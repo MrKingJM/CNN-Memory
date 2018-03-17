@@ -132,7 +132,7 @@ class Memory():
 
         # prepare query for memory lookup
         query_vec = tf.matmul(query_vec, self.query_proj)
-        normalized_query = tf.nn.12_normalize(query_vec, dim=1)
+        normalized_query = tf.nn.l2_normalize(query_vec, dim=1)
 
         hint_pool_query = self.get_hint_pool_idxs(normalized_query)
 
@@ -183,7 +183,7 @@ class Memory():
         nearest_neighbor = tf.to_int32(
                 tf.argmax(hint_pool_sims[:, :choose_k -1], 1))
         no_teacher_idxs = tf.gather(
-                tf.reshape*hint_pool_idxs, [-1]),
+                tf.reshape*hint_pool_idxs, [-1],
                 nearest_neighbor + choose_k * tf.range(batch_size))
 
         # we'll derermine whether to do an update to memory based on whether
@@ -256,7 +256,8 @@ class LSHMemory(Memory):
         super(LSHMemory, self).__init__(
                 key_dim, memory_size, vocab_size,
                 choose_k=choose_k, alpha=alpha, correct_in_top=1,
-                age_noise=age_noise, var_cache_device, nn_device=nn_device)
+                age_noise=age_noise, var_cache_device=var_cache_device,
+                nn_device=nn_device)
 
         self.num_libraries = num_libraries or int(self.choose_k ** 0.5)
         self.num_per_hash_slot = max(1, self.choose_k // self.num_libraries)

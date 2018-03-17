@@ -146,9 +146,9 @@ class Trainer():
         logging.info('batch_size %d' % batch_size)
 
         assert all(len(v) >= float(episode_length) / episode_width
-                    for v in train_data.itervalues())
+                    for v in train_data.items())
         assert all(len(v) >= float(episode_length) / episode_width
-                    for v in valid_data.itervalues())
+                    for v in valid_data.items())
 
         #output_dim = episode_width?
         self.model = self.get_model()

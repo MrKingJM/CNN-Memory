@@ -7,7 +7,7 @@ which returns nearest neighbors.
 
 import tensorflow as tf
 
-#import memory
+import memory
 
 FLAG = tf.flags.FLAGS
 
@@ -28,12 +28,12 @@ class BasicClassfier():
 class LeNet():
     """Standard CNN architecture."""
 
-    def __int__(self, image_size, num_channels, hidden_dim):
+    def __init__(self, image_size, num_channels, hidden_dim):
         self.image_size = image_size
         self.num_channels = num_channels
         self.hidden_dim = hidden_dim
         self.matrix_init = tf.truncated_normal_initializer(stddev=0.1)
-        self.vactor_init = tf.constant_initializer(0.0)
+        self.vector_init = tf.constant_initializer(0.0)
 
     def core_builder(self, x):
         """Embeds x using standard CNN architecture.
@@ -95,8 +95,7 @@ class LeNet():
                             strides=[1, 1, 1, 1], padding='SAME')
         relu2b = tf.relu(tf.nn.bias_add(conv2b, conv2b_weights))
 
-        pool2 = tf.nn.max_pool(relu2b, ksize=[1, 2, 2, 1], padding='SAME',
-                               strides=[1, 2, 2, 1], padding='SAME')
+        pool2 = tf.nn.max_pool(relu2b, ksize=[1, 2, 2, 1], padding='SAME')
 
         reshape = tf.reshape(pool2, [batch_size, -1])
         hidden_dim = tf.matmul(reshape, fc1_weights) + fc1_biases
@@ -172,7 +171,7 @@ class Model():
                                       epsilon=1e-4)
 
     def get_embedder(self):
-        return LeNet(int(self.input_dim ** 0,5), 1, self.rep_dim)
+        return LeNet(int(self.input_dim ** 0.5), 1, self.rep_dim)
 
     def get_memory(self):
         cls = memory.LSHMemory if self.use_lsh else memory.Memory
@@ -181,7 +180,7 @@ class Model():
     def get_classifier(self):
         return BasicClassfier(self.output_dim)
 
-    def core_builder(self, x, y, kepp_prob, use_recent_idx=True):
+    def core_builder(self, x, y, keep_prob, use_recent_idx=True):
         embeddings = self.embedder.core_builder(x)
         if keep_prob < 1.0:
             embeddings = tf.nn.dropout(embeddings, keep_prob)
