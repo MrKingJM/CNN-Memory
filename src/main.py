@@ -59,6 +59,14 @@ class Trainer():
         self.output_dim = (output_dim if output_dim is not None
                             else self.episode_width)
 
+    def get_model(self):
+        # vocab size is the number of distinct values that
+        # could go into the memory key-value storage
+        vocab_size = self.episode_width * self.batch_size
+        return model.Model(
+                self.input_dim, self.output_dim, self.rep_dim,
+                self.memory_size, vocab_size, use_lsh=self.use_lsh)
+
     def sample_episode_batch(self, data,
                              episode_length, episode_width, batch_size):
         """Geerate a random batch for traning or validation.
@@ -106,6 +114,11 @@ class Trainer():
         return ([np.array(xx).astype('float32') for xx in episodes_x],
                 [np.array(yy).astype('int32') for yy in episodes_y])
 
+    def compute_correct(self, ys, y_preds):
+        return np.mean(np.equal(y_preds, np.array(ys)))
+
+    def individual_compute_correct(self, y, y_pred):
+        return y_pred == y
 
     def run(self):
         """Performs training.

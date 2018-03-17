@@ -217,5 +217,39 @@ class Model():
 
         return losses
 
+    def episode_predict(self, sess, x, y, clear_memory=False):
+        """Predict the labels on an episode of examples.
 
+        Args:
+            sess: A tensorflow Session
+            x: A list of batches of images
+            y: A list of labels for the images in x
+                This allows for updating the memory
+            clear_memory" Whether to clear the memory before the episode
 
+        Returns:
+            List of predicted y.
+        """
+
+        cur_memory = sess.run([self.mem_keys, self.mem_vals,
+                               self.mem_age])
+
+        if clear_memory:
+            self.clear_memory(sess)
+
+        outputs = [self.y_preds]
+        y_preds = []
+        for xx, yy in zip(x, y):
+            out = sess.run(outputs, feed_dict={self.x: xx, self.y: yy})
+            y_pred = out[0]
+            y_preds.append(y_pred)
+
+        sess.run([self.mem_reset_op],
+                  feed_dict={self.mem_keys_reset: cur_memory[0],
+                             self.mem_vals_reset: cur_memory[1],
+                             self.mem_age_reset: cur_memory[2]})
+
+        return y_preds
+
+    def clear_memory(self, sess):
+        sess.run([self.memory.clear()])
