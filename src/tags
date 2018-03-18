@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 BasicClassfier	model.py	/^class BasicClassfier():$/;"	c
 DATASET_NAME	data_utils.py	/^DATASET_NAME = DATA_URL.split('\/')[-1]$/;"	v
 DATA_ARCHIVE	data_utils.py	/^DATA_ARCHIVE = os.path.join(DATA_DIR, DATASET_NAME)$/;"	v
@@ -15,44 +15,56 @@ FLAG	model.py	/^FLAG = tf.flags.FLAGS$/;"	v
 FLAGS	main.py	/^FLAGS = tf.flags.FLAGS$/;"	v
 IMAGE_NEW_SIZE	data_utils.py	/^IMAGE_NEW_SIZE = 28$/;"	v
 IMAGE_ORIGINAL_SIZE	data_utils.py	/^IMAGE_ORIGINAL_SIZE = 32$/;"	v
+LSHMemory	memory.py	/^class LSHMemory(Memory):$/;"	c
 LeNet	model.py	/^class LeNet():$/;"	c
 MAIN_DIR	data_utils.py	/^MAIN_DIR = ''$/;"	v
+Memory	memory.py	/^class Memory():$/;"	c
+Model	model.py	/^class Model():$/;"	c
 TEST_DIR	data_utils.py	/^TEST_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_evaluation')$/;"	v
 TEST_ROTATIONS	data_utils.py	/^TEST_ROTATIONS = False$/;"	v
 TRAIN_DIR	data_utils.py	/^TRAIN_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_background')$/;"	v
 TRAIN_ROTATIONS	data_utils.py	/^TRAIN_ROTATIONS = True # augment training data with rotations$/;"	v
 Trainer	main.py	/^class Trainer():$/;"	c
 __init__	main.py	/^    def __init__(self, train_data, valid_data, input_dim, output_dim=None):$/;"	m	class:Trainer
+__init__	memory.py	/^    def __init__(self, key_dim, memory_size, vocab_size,$/;"	m	class:LSHMemory
+__init__	memory.py	/^    def __init__(self, key_dim, memory_size, vocab_size,$/;"	m	class:Memory
+__init__	model.py	/^    def __init__(self, image_size, num_channels, hidden_dim):$/;"	m	class:LeNet
+__init__	model.py	/^    def __init__(self, input_dim, output_dim, rep_dim, memory_size, vocab_size,$/;"	m	class:Model
 __init__	model.py	/^    def __init__(self, output_dim):$/;"	m	class:BasicClassfier
-__int__	model.py	/^    def __int__(self, image_size, num_channels, hidden_dim):$/;"	m	class:LeNet	file:
+clear	memory.py	/^    def clear(self):$/;"	m	class:Memory
+clear_memory	model.py	/^    def clear_memory(self, sess):$/;"	m	class:Model
+compute_correct	main.py	/^    def compute_correct(self, ys, y_preds):$/;"	m	class:Trainer
 convert_RGBs_to_Grey	data_utils.py	/^def convert_RGBs_to_Grey(img, width, height):$/;"	f
 convert_image_array_to_RGBs	data_utils.py	/^def convert_image_array_to_RGBs(array):$/;"	f
 core_builder	model.py	/^    def core_builder(self, memory_val, x, y):$/;"	m	class:BasicClassfier
 core_builder	model.py	/^    def core_builder(self, x):$/;"	m	class:LeNet
+core_builder	model.py	/^    def core_builder(self, x, y, keep_prob, use_recent_idx=True):$/;"	m	class:Model
 crawl_directory	data_utils.py	/^def crawl_directory(augment_with_rotations=False,$/;"	f
-data_utils	main.py	/^import data_utils$/;"	i
+episode_predict	model.py	/^    def episode_predict(self, sess, x, y, clear_memory=False):$/;"	m	class:Model
+episode_step	model.py	/^    def episode_step(self, sess, x, y, clear_memory=False):$/;"	m	class:Model
+eval	model.py	/^    def eval(self, x, y):$/;"	m	class:Model
+get	memory.py	/^    def get(self):$/;"	m	class:Memory
+get_classifier	model.py	/^    def get_classifier(self):$/;"	m	class:Model
 get_data	data_utils.py	/^def get_data():$/;"	f
-logging	data_utils.py	/^import logging$/;"	i
-logging	main.py	/^import logging$/;"	i
+get_embedder	model.py	/^    def get_embedder(self):$/;"	m	class:Model
+get_hint_pool_idxs	memory.py	/^    def get_hint_pool_idxs(self, normalized_query):$/;"	m	class:Memory
+get_memory	model.py	/^    def get_memory(self):$/;"	m	class:Model
+get_model	main.py	/^    def get_model(self):$/;"	m	class:Trainer
+get_optimizer	model.py	/^    def get_optimizer(self):$/;"	m	class:Model
+get_xy_placeholders	model.py	/^    def get_xy_placeholders(self):$/;"	m	class:Model
+individual_compute_correct	main.py	/^    def individual_compute_correct(self, y, y_pred):$/;"	m	class:Trainer
 main	main.py	/^def main(unused_argv):$/;"	f
+make_update_op	memory.py	/^        def make_update_op():$/;"	f	function:Memory.query
+make_update_op	memory.py	/^    def make_update_op(self, upd_idxs, upd_keys, upd_vals,$/;"	m	class:Memory
 maybe_download_and_extract	data_utils.py	/^def maybe_download_and_extract():$/;"	f
-model	main.py	/^import model$/;"	i
-np	data_utils.py	/^import numpy as np$/;"	i
-np	main.py	/^import numpy as np$/;"	i
-os	data_utils.py	/^import os$/;"	i
-os	main.py	/^import os$/;"	i
-pickle	data_utils.py	/^import pickle$/;"	i
 preprocess_dataset	data_utils.py	/^def preprocess_dataset():$/;"	f
-random	main.py	/^import random$/;"	i
-resize	data_utils.py	/^from skimage.transform import resize$/;"	i
+query	memory.py	/^    def query(self, query_vec, intended_output, use_recent_idx=True):$/;"	m	class:Memory
 resize_images	data_utils.py	/^def resize_images(images, new_width, new_height):$/;"	f
-rotate	data_utils.py	/^from skimage.transform import rotate$/;"	i
 run	main.py	/^    def run(self):$/;"	m	class:Trainer
 sample_episode_batch	main.py	/^    def sample_episode_batch(self, data,$/;"	m	class:Trainer
-tarfile	data_utils.py	/^import tarfile$/;"	i
-tf	data_utils.py	/^import tensorflow as tf$/;"	i
-tf	main.py	/^import tensorflow as tf$/;"	i
-tf	model.py	/^import tensorflow as tf$/;"	i
+set	memory.py	/^    def set(self, k, v, a, r=None):$/;"	m	class:Memory
+setup	model.py	/^    def setup(self):$/;"	m	class:Model
+train	model.py	/^    def train(self, x, y):$/;"	m	class:Model
+training_ops	model.py	/^    def training_ops(self, loss):$/;"	m	class:Model
 unpickle	data_utils.py	/^def unpickle(filename):$/;"	f
-wget	data_utils.py	/^import wget$/;"	i
 write_datafiles	data_utils.py	/^def write_datafiles(directory, write_file,$/;"	f
