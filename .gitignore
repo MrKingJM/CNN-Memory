@@ -2,5 +2,6 @@ ref/omniglot/*
 data/*
 src/__pycache__/*
 ref/__pycache__/*
+model/*
 ref/*.pkl
 .DS_Store

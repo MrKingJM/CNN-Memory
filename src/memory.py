@@ -39,6 +39,10 @@ class Memory():
                 trainable=False,
                 initializer=tf.constant_initializer(0, tf.int32),
                 caching_device=caching_device)
+        self.mem_age = tf.get_variable(
+                'memage', [self.memory_size], dtype=tf.float32, trainable=False,
+                initializer=tf.constant_initializer(0.0),
+                caching_device=caching_device)
         self.recent_idx = tf.get_variable(
                 'recent_idx', [self.vocab_size], dtype=tf.int32,
                 trainable=False,
@@ -81,6 +85,8 @@ class Memory():
         """
         # look up in large memory, no gradients
         with tf.device(self.nn_device):
+            # ?? tf.stop_gradient
+            # ?? explanation of this computation way
             similarities = tf.matmul(tf.stop_gradient(normalized_query),
                                      self.mem_keys, transpose_b=True,
                                      name='nn_mmul')
@@ -98,7 +104,7 @@ class Memory():
             mem_age_upd = tf.scatter_update(self.mem_age, upd_idxs,
                                             tf.zeros([batch_size], dtype=tf.float32))
 
-        mem_key_upd = tf.scatter_updae(
+        mem_key_upd = tf.scatter_update(
                 self.mem_keys, upd_idxs, upd_keys)
         mem_val_upd = tf.scatter_update(
                 self.mem_vals, upd_idxs, upd_vals)
@@ -107,7 +113,7 @@ class Memory():
             recent_idx_upd = tf.scatter_update(
                     self.recent_idx, intended_output, upd_idxs)
         else:
-            recent_idx = tf.group()
+            recent_idx_upd = tf.group()
 
         return tf.group(mem_age_upd, mem_key_upd, mem_val_upd, recent_idx_upd)
 
@@ -132,9 +138,9 @@ class Memory():
 
         # prepare query for memory lookup
         query_vec = tf.matmul(query_vec, self.query_proj)
-        normalized_query = tf.nn.l2_normalize(query_vec, dim=1)
+        normalized_query = tf.nn.l2_normalize(query_vec, axis=1)
 
-        hint_pool_query = self.get_hint_pool_idxs(normalized_query)
+        hint_pool_idxs = self.get_hint_pool_idxs(normalized_query)
 
         if output_given and use_recent_idx: # add at least one correct memory
             most_recent_hint_idx = tf.gather(self.recent_idx, intended_output)
@@ -146,15 +152,19 @@ class Memory():
 
         with tf.device(self.var_cache_device):
             # create small memory and look up with gradients
+            # [None, 256] ??
             my_mem_keys = tf.stop_gradient(tf.gather(self.mem_keys, hint_pool_idxs,
                                                      name='my_mem_keys_gather'))
+            # add a dimension, 128
             similarities = tf.matmul(tf.expand_dims(normalized_query, 1),
                                      my_mem_keys, adjoint_b=True, name='batch_mmul')
+            # delete a dimension
             hint_pool_sims = tf.squeeze(similarities, [1], name='hint_pool_sims')
+            # slices
             hint_pool_mem_vals = tf.gather(self.mem_vals, hint_pool_idxs,
                                            name='hint_pool_mem_vals')
-        # Calculate softmax maks on the top-k if requested
-        # Softmax temperature. Say we have K elements at disk x and ont at (x+a)
+        # Calculate softmax mask on the top-k if requested
+        # Softmax temperature. Say we have K elements at disk x and one at (x+a)
         # Softmax of the last is e^tm(x+a)/Ke^tm*x + e^tm(x+a) = e^tm*a/K+e^tm*a
         # To make than 20% we'd need to have e^tm*a ~= 0.2K, so tm = log(0.2K)/a
         softmax_temp = max(1.0, np.log(0.2 * self.choose_k) / self.alpha)
@@ -183,7 +193,7 @@ class Memory():
         nearest_neighbor = tf.to_int32(
                 tf.argmax(hint_pool_sims[:, :choose_k -1], 1))
         no_teacher_idxs = tf.gather(
-                tf.reshape*hint_pool_idxs, [-1],
+                tf.reshape(hint_pool_idxs, [-1]),
                 nearest_neighbor + choose_k * tf.range(batch_size))
 
         # we'll derermine whether to do an update to memory based on whether
@@ -202,7 +212,7 @@ class Memory():
         update_keys = normalized_query
         update_vals = intended_output
 
-        fetched_idxs = teacehr_idxs # correctly fetch from memory
+        fetched_idxs = teacher_idxs # correctly fetch from memory
         with tf.device(self.var_cache_device):
             fetched_keys = tf.gather(self.mem_keys, fetched_idxs,
                                      name='fetched_keys')
@@ -211,10 +221,10 @@ class Memory():
 
         # do memory update here
         fetched_keys_upd = update_keys + fetched_keys # Nomemtum-like update
-        fetched_keys_upd = tf.nn.l2_normalized(fetched_keys_upd, dim=1)
+        fetched_keys_upd = tf.nn.l2_normalize(fetched_keys_upd, dim=1)
         # Randomize age a bit, e.g., to select different ones in parallel workers
         mem_age_with_noise = self.mem_age + tf.random_uniform(
-                [self.memory], - self.age_noise, self.age_noise)
+                [self.memory_size], - self.age_noise, self.age_noise)
 
         _, oldest_idx = tf.nn.top_k(mem_age_with_noise, k=batch_size, sorted=False)
 
@@ -223,12 +233,12 @@ class Memory():
                                 oldest_idx,
                                 fetched_idxs)
             # upd_idxs = tf.Print(upd_idxs, [upd_idxs], "UPO IDX", summarize=8)
-            update_keys = tf.where(incorrect_memory_lookup,
+            upd_keys = tf.where(incorrect_memory_lookup,
                                    update_keys,
                                    fetched_keys_upd)
             upd_vals = tf.where(incorrect_memory_lookup,
-                                updaye_vals,
-                                fetched_vals)
+                                update_vals,
+                                fetched_values)
 
         def make_update_op():
             return self.make_update_op(upd_idxs, upd_keys, upd_vals,

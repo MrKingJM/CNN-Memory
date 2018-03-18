@@ -97,7 +97,7 @@ class Trainer():
             episode_x = [
                     random.sample(data[lab],
                                   r + (episode_length - remainder)
-                                  / episode_width)
+                                  // episode_width)
                     for lab, r in zip(episode_labels, remainders)]
 
             episode = sum([[(x, i, ii) for ii, x in enumerate(xx)]
@@ -206,9 +206,12 @@ class Trainer():
                             seen_counts[k][yyy % self.episode_width] = count + 1
 
                 logging.info('validation overall accuracy %f', np.mean(correct))
-                logging.info('%d-shot: %.3f, ' % ( self.episode_width + 1,
-                            sum([[k, np.mean(correct_by_shot[k])]
-                                for k in range(self.episode_width + 1)], [])))
+                logging.info('%d-shot: %.3f, ' *( self.episode_width + 1),
+                            *sum([[k, np.mean(correct_by_shot[k])]
+                                for k in range(self.episode_width + 1)], []))
+                #logging.info('%d-shot: %.3f, ' % ( self.episode_width + 1,
+                #            *sum([[k, np.mean(correct_by_shot[k])]
+                #                for k in range(self.episode_width + 1)], [])))
 
                 if saver and FLAGS.save_dir:
                     saved_file = saver.save(sess,

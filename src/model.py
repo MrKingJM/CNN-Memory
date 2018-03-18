@@ -45,8 +45,11 @@ class LeNet():
             A 2-d Tensor [batch_size, hidden_dim] of embedded images.
         """
 
-        ch1 = 32 * 2 # number of channels in 1st layer
-        ch2 = 64 * 2 # number of channels in 2nd layer
+        ch1 = 32 * 2 # number of channels in 1st layer ??
+        ch2 = 64 * 2 # number of channels in 2nd layer ??
+
+        #y kernel size is 3*3, conv1 use ch1, conv2 use ch2
+        # for each kernel we use the same amount biases
         conv1a_weights = tf.get_variable('conv1a_w',
                                         [3, 3, self.num_channels, ch1],
                                         initializer=self.matrix_init)
@@ -58,9 +61,9 @@ class LeNet():
         conv1b_biases = tf.get_variable('conv1b_b', [ch1],
                                         initializer=self.vector_init)
 
-        conv2a_weights = tf.get_variable('conv2b_w', [3, 3, ch1, ch2],
+        conv2a_weights = tf.get_variable('conv2a_w', [3, 3, ch1, ch2],
                                          initializer=self.matrix_init)
-        conv2a_biases = tf.get_variable('conv2b_b', [ch2],
+        conv2a_biases = tf.get_variable('conv2a_b', [ch2],
                                         initializer=self.vector_init)
         conv2b_weights = tf.get_variable('conv2b_w', [3, 3, ch2, ch2],
                                          initializer=self.matrix_init)
@@ -77,6 +80,7 @@ class LeNet():
         # define model
         x = tf.reshape(x,
                        [-1, self.image_size, self.image_size, self.num_channels])
+        batch_size = tf.shape(x)[0]
 
         conv1a = tf.nn.conv2d(x, conv1a_weights,
                              strides=[1, 1, 1, 1], padding='SAME')
@@ -85,6 +89,7 @@ class LeNet():
                               strides=[1, 1, 1, 1], padding='SAME')
         relu1b = tf.nn.relu(tf.nn.bias_add(conv1b, conv1b_biases))
 
+        # subsample 2*2, ksize for window, strides for walking
         pool1 = tf.nn.max_pool(relu1b, ksize=[1, 2, 2, 1],
                                strides=[1, 2, 2, 1], padding='SAME')
 
@@ -93,12 +98,13 @@ class LeNet():
         relu2a = tf.nn.relu(tf.nn.bias_add(conv2a, conv2a_biases))
         conv2b = tf.nn.conv2d(relu2a, conv2b_weights,
                             strides=[1, 1, 1, 1], padding='SAME')
-        relu2b = tf.relu(tf.nn.bias_add(conv2b, conv2b_weights))
+        relu2b = tf.nn.relu(tf.nn.bias_add(conv2b, conv2b_biases))
 
-        pool2 = tf.nn.max_pool(relu2b, ksize=[1, 2, 2, 1], padding='SAME')
+        pool2 = tf.nn.max_pool(relu2b, ksize=[1, 2, 2, 1],
+                               strides=[1,2,2,1], padding='SAME')
 
         reshape = tf.reshape(pool2, [batch_size, -1])
-        hidden_dim = tf.matmul(reshape, fc1_weights) + fc1_biases
+        hidden = tf.matmul(reshape, fc1_weights) + fc1_biases
 
         return hidden
 
@@ -124,10 +130,14 @@ class Model():
 
     def train(self, x, y):
         loss, _ = self.core_builder(x, y, keep_prob=0.3)
+        gradient_ops = self.training_ops(loss)
+        return loss, gradient_ops
 
     def eval(self, x, y):
         _, y_preds = self.core_builder(x, y, keep_prob=1.0,
                                        use_recent_idx=False)
+        return y_preds
+
     def get_xy_placeholders(self):
         return (tf.placeholder(tf.float32, [None, self.input_dim]),
                 tf.placeholder(tf.int32, [None]))
@@ -188,7 +198,7 @@ class Model():
                 embeddings, y, use_recent_idx=use_recent_idx)
         loss, y_preds = self.classifier.core_builder(memory_val, x, y)
 
-        return loss + teacher_loss, y_pred
+        return loss + teacher_loss, y_preds
 
     def episode_step(self, sess, x, y, clear_memory=False):
         """Performs training steps on episodic input.
