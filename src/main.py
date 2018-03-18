@@ -129,7 +129,7 @@ class Trainer():
 
         train_data, valid_data  = self.train_data, self.valid_data
         input_dim , output_dim = self.input_dim, self.output_dim
-        rep_dim, episode_length = self.rep_dim, self.output_dim
+        rep_dim, episode_length = self.rep_dim, self.episode_length
         episode_width, memory_size = self.episode_width, self.memory_size
         batch_size = self.batch_size
 
@@ -146,9 +146,9 @@ class Trainer():
         logging.info('batch_size %d' % batch_size)
 
         assert all(len(v) >= float(episode_length) / episode_width
-                    for v in train_data.items())
+                    for v in train_data.values())
         assert all(len(v) >= float(episode_length) / episode_width
-                    for v in valid_data.items())
+                    for v in valid_data.values())
 
         #output_dim = episode_width?
         self.model = self.get_model()
