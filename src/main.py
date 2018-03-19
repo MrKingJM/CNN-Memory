@@ -20,13 +20,13 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_integer('rep_dim', 128,
                         'dimension of keys to use in memory')
-tf.flags.DEFINE_integer('episode_length', 100, 'length of episode')
+tf.flags.DEFINE_integer('episode_length', 1000, 'length of episode')
 tf.flags.DEFINE_integer('episode_width', 5,
                         'number of distinct labels in a single episode')
 tf.flags.DEFINE_integer('memory_size', None, 'number of slots in memory.'
                         'Leave as None to default to episode length')
 tf.flags.DEFINE_integer('batch_size', 16, 'batch_size')
-tf.flags.DEFINE_integer('num_episodes', 100000, 'number of training episodes')
+tf.flags.DEFINE_integer('num_episodes', 10000, 'number of training episodes')
 tf.flags.DEFINE_integer('validation_length', 10,
                         'number of episodes to use to compute '
                         'validation accuracy')
@@ -185,30 +185,35 @@ class Trainer():
                 correct = []
                 correct_by_shot = dict((k, []) for k in range(self.episode_width + 1))
                 for _ in range(FLAGS.validation_length):
+                    # validation data
+                    #x, y = self.sample_episode_batch(
+                    #        valid_data, episode_length, episode_width, 1)
+
+                    # train data
                     x, y = self.sample_episode_batch(
-                            valid_data, episode_length, episode_width, 1)
+                            train_data, episode_length, episode_width, 1)
                     outputs = self.model.episode_predict(
                             sess, x, y, clear_memory=True)
                     y_preds = outputs
                     correct.append(self.compute_correct(np.array(y), y_preds))
 
                     # compute pre-shot accuracies
-                    seen_counts = [[0] * episode_width for _ in range(batch_size)]
+#                    seen_counts = [[0] * episode_width for _ in range(batch_size)]
                     # loop over episode steps
-                    for yy, yy_preds in zip(y, y_preds):
-                        # loop over batch examples
-                        for k, (yyy, yyy_preds) in enumerate(zip(yy, yy_preds)):
-                            yyy, yyy_preds = int(yyy), int(yyy_preds)
-                            count = seen_counts[k][yyy % self.episode_width]
-                            if count in correct_by_shot:
-                                correct_by_shot[count].append(
-                                        self.individual_compute_correct(yyy, yyy_preds))
-                            seen_counts[k][yyy % self.episode_width] = count + 1
+#                    for yy, yy_preds in zip(y, y_preds):
+#                        # loop over batch examples
+#                        for k, (yyy, yyy_preds) in enumerate(zip(yy, yy_preds)):
+#                            yyy, yyy_preds = int(yyy), int(yyy_preds)
+#                            count = seen_counts[k][yyy % self.episode_width]
+#                            if count in correct_by_shot:
+#                                correct_by_shot[count].append(
+#                                        self.individual_compute_correct(yyy, yyy_preds))
+#                            seen_counts[k][yyy % self.episode_width] = count + 1
 
                 logging.info('validation overall accuracy %f', np.mean(correct))
-                logging.info('%d-shot: %.3f, ' *( self.episode_width + 1),
-                            *sum([[k, np.mean(correct_by_shot[k])]
-                                for k in range(self.episode_width + 1)], []))
+                #logging.info('%d-shot: %.3f, ' *( self.episode_width + 1),
+                #            *sum([[k, np.mean(correct_by_shot[k])]
+                #                for k in range(self.episode_width + 1)], []))
                 #logging.info('%d-shot: %.3f, ' % ( self.episode_width + 1,
                 #            *sum([[k, np.mean(correct_by_shot[k])]
                 #                for k in range(self.episode_width + 1)], [])))
