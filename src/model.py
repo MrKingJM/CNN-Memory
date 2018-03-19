@@ -185,7 +185,7 @@ class Model():
 
     def get_memory(self):
         cls = memory.LSHMemory if self.use_lsh else memory.Memory
-        return cls(self.rep_dim, self.memory_size, self.vocab_size)
+        return cls(self.rep_dim, self.memory_size, self.vocab_size, nn_device='/gpu:1')
 
     def get_classifier(self):
         return BasicClassfier(self.output_dim)
