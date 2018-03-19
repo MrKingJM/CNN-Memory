@@ -154,7 +154,7 @@ class Trainer():
         self.model = self.get_model()
         self.model.setup()
 
-        sess = tf.Session()
+        sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver(max_to_keep=10)
@@ -183,7 +183,7 @@ class Trainer():
 
                 # validation
                 correct = []
-                correct_by_shot = dict((k, []) for k in range(self.episode_width + 1))
+                #correct_by_shot = dict((k, []) for k in range(self.episode_width + 1))
                 for _ in range(FLAGS.validation_length):
                     # validation data
                     #x, y = self.sample_episode_batch(

@@ -225,7 +225,7 @@ class Model():
             losses.append(loss)
 
         return losses
-
+#
     def episode_predict(self, sess, x, y, clear_memory=False):
         """Predict the labels on an episode of examples.
 
