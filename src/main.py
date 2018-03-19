@@ -136,6 +136,7 @@ class Trainer():
 
         train_size = len(train_data)
         valid_size = len(valid_data)
+        logging.info('tensorflow version %s' % tf.__version__)
         logging.info('train_size (number of labels) %d'% train_size)
         logging.info('valid_size (number of label) %d'% valid_size)
         logging.info('input_dim %d' % input_dim)
