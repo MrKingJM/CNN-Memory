@@ -15,6 +15,7 @@ import tensorflow as tf
 import data_utils
 import model
 
+os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 FLAGS = tf.flags.FLAGS
 
