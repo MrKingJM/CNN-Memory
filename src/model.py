@@ -9,7 +9,7 @@ import tensorflow as tf
 
 import memory
 
-FLAG = tf.flags.FLAGS
+#FLAG = tf.flags.FLAGS
 
 
 class BasicClassfier():
