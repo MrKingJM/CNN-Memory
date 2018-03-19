@@ -145,7 +145,7 @@ class Memory():
         if output_given and use_recent_idx: # add at least one correct memory
             most_recent_hint_idx = tf.gather(self.recent_idx, intended_output)
             hint_pool_idxs = tf.concat(
-                    dim=1,
+                    axis=1,
                     values=[hint_pool_idxs,
                     tf.expand_dims(most_recent_hint_idx, 1)])
         choose_k = tf.shape(hint_pool_idxs)[1]
