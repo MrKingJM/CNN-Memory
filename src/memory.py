@@ -138,14 +138,14 @@ class Memory():
 
         # prepare query for memory lookup
         query_vec = tf.matmul(query_vec, self.query_proj)
-        normalized_query = tf.nn.l2_normalize(query_vec, axis=1)
+        normalized_query = tf.nn.l2_normalize(query_vec, dim=1)
 
         hint_pool_idxs = self.get_hint_pool_idxs(normalized_query)
 
         if output_given and use_recent_idx: # add at least one correct memory
             most_recent_hint_idx = tf.gather(self.recent_idx, intended_output)
             hint_pool_idxs = tf.concat(
-                    axis=1,
+                    dim=1,
                     values=[hint_pool_idxs,
                     tf.expand_dims(most_recent_hint_idx, 1)])
         choose_k = tf.shape(hint_pool_idxs)[1]
