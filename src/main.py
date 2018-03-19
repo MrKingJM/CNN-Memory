@@ -156,7 +156,8 @@ class Trainer():
         self.model = self.get_model()
         self.model.setup()
 
-        sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+        #sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+        sess = tf.Session(config=tf.ConfigProto())
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver(max_to_keep=10)
