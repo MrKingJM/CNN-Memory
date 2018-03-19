@@ -5,3 +5,4 @@ ref/__pycache__/*
 model/*
 ref/*.pkl
 .DS_Store
+src/sftp-config.json
