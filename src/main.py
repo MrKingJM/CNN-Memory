@@ -16,7 +16,7 @@ import data_utils
 import model
 
 
-FLAGS = tf.flags.FLAGS
+#FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_integer('rep_dim', 128,
                         'dimension of keys to use in memory')
