@@ -178,7 +178,6 @@ class Trainer():
             outputs = self.model.episode_step(sess, x, y, clear_memory=True)
             loss = outputs
             losses.append(loss)
-
             if i % FLAGS.validation_frequency == 0:
                 logging.info('episode batch %d, avg train loss %f',
                         i, np.mean(losses))
