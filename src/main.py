@@ -22,7 +22,7 @@ FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_integer('rep_dim', 128,
                         'dimension of keys to use in memory')
 tf.flags.DEFINE_integer('episode_length', 1000, 'length of episode')
-tf.flags.DEFINE_integer('episode_width', 5,
+tf.flags.DEFINE_integer('episode_width', 10,
                         'number of distinct labels in a single episode')
 tf.flags.DEFINE_integer('memory_size', None, 'number of slots in memory.'
                         'Leave as None to default to episode length')
@@ -156,8 +156,10 @@ class Trainer():
         self.model = self.get_model()
         self.model.setup()
 
-        #sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-        sess = tf.Session(config=tf.ConfigProto())
+        # using memory gpu in a effective way
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver(max_to_keep=10)
