@@ -83,8 +83,6 @@ def get_data():
 
     train_data = {}
     test_data = {}
-    #train_data = processed_train_data
-    #test_data = processed_test_data
 
     for data, processed_data in zip([train_data, test_data],
                                     [processed_train_data, processed_test_data]):
@@ -93,9 +91,6 @@ def get_data():
             if label not in data:
                 data[label] = []
             data[label].append(image.reshape([-1]).astype('float32'))
-
-    #logging.info('Number of keys() in train data: %d.', len(train_data))
-    #logging.info('Number of keys() in test data: %d.', len(test_data))
 
     return train_data, test_data
 
@@ -172,7 +167,6 @@ def resize_images(images, new_width, new_height):
     for i in range(images.shape[0]):
         resized_images[i, :, :] = resize(images[i,:,:],
                                         (new_width, new_height))
-
     return resized_images
 
 def write_datafiles(directory, write_file,
