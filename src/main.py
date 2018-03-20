@@ -21,8 +21,8 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_integer('rep_dim', 128,
                         'dimension of keys to use in memory')
-tf.flags.DEFINE_integer('episode_length', 1000, 'length of episode')
-tf.flags.DEFINE_integer('episode_width', 10,
+tf.flags.DEFINE_integer('episode_length', 100, 'length of episode')
+tf.flags.DEFINE_integer('episode_width', 5,
                         'number of distinct labels in a single episode')
 tf.flags.DEFINE_integer('memory_size', None, 'number of slots in memory.'
                         'Leave as None to default to episode length')

@@ -27,7 +27,7 @@ TRAIN_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_background')
 TEST_DIR = os.path.join(DATA_UNARCHIVE_DIR, 'images_evaluation')
 DATA_FILE_FORMAT = '%s_dataset.pkl'
 
-TRAIN_ROTATIONS = True # augment training data with rotations
+TRAIN_ROTATIONS = False # augment training data with rotations
 TEST_ROTATIONS = False
 IMAGE_ORIGINAL_SIZE = 32
 IMAGE_NEW_SIZE = 28
